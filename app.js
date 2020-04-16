@@ -2,7 +2,19 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
-const sendGrid = require('@sendGrid/mail');
+//const sendGrid = require('@sendGrid/mail');
+var nodemailer = require('nodemailer');
+
+require('dotenv').config();
+
+var transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.DB_USER,
+    pass: process.env.DB_PASS
+  }
+});
+
 
 
 const app = express();
@@ -27,32 +39,26 @@ app.get('/api', (req, res, next) => {
 
 app.post('/api/email', (req, res, next) => {
 
-    console.log(req.body);
-
-    sendGrid.setApiKey(process.env.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);
-    const msg = {
-        to: 'ianclark226@gmail.com',
+  var mailOptions = {
+    to: 'ianclark226@gmail.com',
         from: req.body.email,
         subject: 'Website Contact',
         text: req.body.message
+  };
+  
+  transporter.sendMail(mailOptions, function(error, info){
+    if (error) {
+      console.log(error);
+    } else {
+      console.log('Email sent: ' + info.response);
     }
+  });
+    
 
-    sendGrid.send(msg)
-        .then(result => {
+    
 
-            res.status(200).json({
-                success: true
-            });
-
-        })
-        .catch(err => {
-
-            console.log('error: ', err);
-            res.status(401).json({
-                success: false
-            });
-
-        });
+   
+       
 });
 
 
